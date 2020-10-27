@@ -1,8 +1,9 @@
 package EShop.lab2
 
-import akka.actor.{Actor, ActorRef, Cancellable, Props}
+import akka.actor.{Actor, ActorRef, Cancellable, Props, Timers}
 import akka.event.{Logging, LoggingReceive}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
@@ -20,24 +21,45 @@ object CartActor {
   sealed trait Event
   case class CheckoutStarted(checkoutRef: ActorRef) extends Event
 
-  def props() = Props(new CartActor())
+  def props: Props = Props(new CartActor())
 }
 
-class CartActor extends Actor {
-
+class CartActor extends Actor{
   import CartActor._
 
   private val log       = Logging(context.system, this)
-  val cartTimerDuration = 5 seconds
+  val cartTimerDuration: FiniteDuration = 5 seconds
 
-  private def scheduleTimer: Cancellable = ???
+  private def scheduleTimer(): Cancellable = context.system.scheduler.scheduleOnce(cartTimerDuration, self, ExpireCart)
 
-  def receive: Receive = ???
+  def receive: Receive = LoggingReceive {
+    case AddItem(item) =>
+      context become nonEmpty(Cart.empty.addItem(item), scheduleTimer())
+  }
 
-  def empty: Receive = ???
+  def empty: Receive = receive
 
-  def nonEmpty(cart: Cart, timer: Cancellable): Receive = ???
+  def nonEmpty(cart: Cart, timer: Cancellable): Receive = LoggingReceive {
+    case AddItem(item) =>
+      context become nonEmpty(cart.addItem(item), timer)
+    case ExpireCart =>
+      context become empty
+    case StartCheckout =>
+      context become inCheckout(cart)
+    case RemoveItem(item) if cart.contains(item) =>
+      if (cart.size == 1) {
+        context become empty
+      } else {
+        val newCart = cart.removeItem(item)
+        context become nonEmpty(newCart, timer)
+      }
+  }
 
-  def inCheckout(cart: Cart): Receive = ???
+  def inCheckout(cart: Cart): Receive = LoggingReceive {
+    case ConfirmCheckoutCancelled =>
+      context become nonEmpty(cart, scheduleTimer())
+    case ConfirmCheckoutClosed =>
+      context become empty
+  }
 
 }
