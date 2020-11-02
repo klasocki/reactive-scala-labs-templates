@@ -2,7 +2,7 @@ package EShop.lab3
 
 import EShop.lab2.{TypedCartActor, TypedCheckout}
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.{ActorRef, Behavior, Props}
 
 object TypedOrderManager {
 

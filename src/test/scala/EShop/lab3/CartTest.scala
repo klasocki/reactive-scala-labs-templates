@@ -1,7 +1,7 @@
 package EShop.lab3
 
-import EShop.lab2.{Cart, CartActor}
-import akka.actor.ActorSystem
+import EShop.lab2.{Cart, CartActor, Checkout}
+import akka.actor.{ActorSystem, Cancellable, Props}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit, TestProbe}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.ScalaFutures
@@ -23,14 +23,30 @@ class CartTest
 
   //use GetItems command which was added to make test easier
   it should "add item properly" in {
-    ???
+    val cart = system.actorOf(Props(new CartActor))
+
+    cart ! AddItem("Hamlet")
+    cart ! GetItems
+
+    expectMsg(Seq("Hamlet"))
   }
 
   it should "be empty after adding and removing the same item" in {
-    ???
+    val cart = system.actorOf(Props(new CartActor))
+
+    cart ! AddItem("Makbet")
+    cart ! RemoveItem("Makbet")
+    cart ! GetItems
+
+    expectMsg(Seq.empty[String])
   }
 
   it should "start checkout" in {
-    ???
+    val cart = system.actorOf(Props(new CartActor))
+
+    cart ! AddItem("Makbet")
+    cart ! StartCheckout
+
+    expectMsgType[CartActor.CheckoutStarted]
   }
 }

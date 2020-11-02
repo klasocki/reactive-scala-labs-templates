@@ -14,7 +14,7 @@ class CheckoutTest
   with ImplicitSender
   with BeforeAndAfterAll {
 
-  val cartActor      = TestProbe().ref
+  val cartActor: ActorRef = TestProbe().ref
   val deliveryMethod = "post"
   val paymentMethod  = "paypal"
 
