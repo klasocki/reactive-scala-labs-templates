@@ -15,7 +15,7 @@ object TypedCartActor {
   case class AddItem(item: Any)                                                  extends Command
   case class RemoveItem(item: Any)                                               extends Command
   case object ExpireCart                                                         extends Command
-  case class StartCheckout(orderManagerRef: ActorRef[TypedOrderManager.Command]) extends Command
+  case object StartCheckout extends Command
   case object ConfirmCheckoutCancelled                                           extends Command
   case object ConfirmCheckoutClosed                                              extends Command
   case class GetItems(sender: ActorRef[Cart])                                    extends Command

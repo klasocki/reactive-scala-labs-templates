@@ -37,8 +37,8 @@ class Checkout(
   private val scheduler = context.system.scheduler
   private val log       = Logging(context.system, this)
 
-  val checkoutTimerDuration = 1 seconds
-  val paymentTimerDuration  = 1 seconds
+  val checkoutTimerDuration: FiniteDuration = 1 seconds
+  val paymentTimerDuration: FiniteDuration = 1 seconds
 
   def receive: Receive = LoggingReceive {
     case StartCheckout =>
