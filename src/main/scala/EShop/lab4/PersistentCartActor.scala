@@ -1,6 +1,7 @@
 package EShop.lab4
 
 import EShop.lab2.{Cart, Checkout}
+import EShop.lab3.OrderManager
 import akka.actor.{Cancellable, Props}
 import akka.event.{Logging, LoggingReceive}
 import akka.persistence.PersistentActor
@@ -61,13 +62,13 @@ class PersistentCartActor(
         event => updateState(event)
       }
     case StartCheckout =>
-      val checkout = context.system.actorOf(Props(new Checkout(self)), "checkout")
+      val checkout = context.system.actorOf(Props(new PersistentCheckout(self, this.persistenceId + "ch")))
       persist(CheckoutStarted(checkoutRef = checkout, cart = cart)) {
         event =>
           timer.cancel()
           updateState(event)
           checkout ! Checkout.StartCheckout
-          sender ! CheckoutStarted(checkout, cart)
+          sender ! OrderManager.ConfirmCheckoutStarted(checkout)
       }
 
     case RemoveItem(item) if cart.contains(item) =>

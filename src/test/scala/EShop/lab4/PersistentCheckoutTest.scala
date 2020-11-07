@@ -123,7 +123,7 @@ class PersistentCheckoutTest
     checkoutActorAfterRestart ! SelectPayment(paymentMethod)
     fishForMessage() {
       case m: String if m == processingPaymentMsg => true
-      case _: OrderManager.ConfirmPaymentStarted  => false
+      case _: OrderManager.ConfirmPaymentStarted => false
     }
   }
 

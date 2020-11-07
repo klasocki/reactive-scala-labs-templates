@@ -1,7 +1,7 @@
 package EShop.lab4
 
 import EShop.lab2.CartActor
-import EShop.lab3.Payment
+import EShop.lab3.{OrderManager, Payment}
 import akka.actor.{ActorRef, Cancellable, Props}
 import akka.event.{Logging, LoggingReceive}
 import akka.persistence.PersistentActor
@@ -73,13 +73,13 @@ class PersistentCheckout(
       persist(PaymentStarted(payment)) {
         event =>
           timer.cancel()
-          sender ! PaymentStarted(payment)
+          sender ! OrderManager.ConfirmPaymentStarted(payment)
           updateState(event)
       }
   }
 
   def processingPayment(timer: Cancellable): Receive = LoggingReceive {
-    case ExpirePayment | CancelCheckout =>
+    case ExpireCheckout | CancelCheckout =>
       persist(CheckoutCancelled) {
         event =>
           updateState(event)
@@ -94,11 +94,15 @@ class PersistentCheckout(
   }
 
   def cancelled: Receive = LoggingReceive {
-    case _ => context stop self
+    case _ =>
+      println("Checkout cancelled")
+      context stop self
   }
 
   def closed: Receive = LoggingReceive {
-    case _ => context stop self
+    case _ =>
+      println("Checkout successful")
+      context stop self
   }
   override def receiveRecover: Receive =  LoggingReceive {
     case x: Event =>

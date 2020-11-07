@@ -111,7 +111,10 @@ class PersistentCartActorTest
     cart ! PoisonPill
     val cartActorAfterRestart: ActorRef = cartActorWithCartSizeResponseOnStateChange(system, id)
     cartActorAfterRestart ! ConfirmCheckoutCancelled
-    expectMsg(nonEmptyMsg)
+    fishForMessage() {
+      case m: String if m == nonEmptyMsg        => true
+      case _: OrderManager.ConfirmCheckoutStarted => false
+    }
     expectMsg(1)
   }
 
