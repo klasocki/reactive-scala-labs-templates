@@ -13,7 +13,7 @@ import scala.concurrent.duration.Duration
 import scala.util.Random
 
 class MainActor extends Actor {
-  val cartId: String = "2"
+  val cartId: String = "3"
 
   override def receive: Receive = LoggingReceive {
     case "init" =>
